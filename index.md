@@ -17,7 +17,7 @@ I am going to assume that if you are reading this to create your own Raspberry P
 
 ## Parts List  (total cost ~$80)
 
-* [Raspberry Pi 2 - Model B](https://www.adafruit.com/products/2358) (~$40)
+* [Raspberry Pi 2 - Model B+](https://www.adafruit.com/products/2358) (~$40)
 * [Raspberry Pi Case](https://www.adafruit.com/products/2285) (~$5)
 * [MicroSD card with 64 GB of storage](http://amzn.com/B00R7CSHWW) (~$25)
 * [Mirco USB charger that you can dedicate to the Raspberry Pi](https://www.adafruit.com/products/1995) (~$8)
@@ -52,13 +52,13 @@ I am going to assume that if you are reading this to create your own Raspberry P
   sudo apt-get install build-essential autoconf libssl-dev libboost-dev 
   sudo apt-get install libboost-chrono-dev libboost-filesystem-dev
   sudo apt-get install libboost-program-options-dev libboost-system-dev 
-  sudo apt-get install libboost-test-dev libboost-thread-dev libtool
+  sudo apt-get install libboost-test-dev libboost-thread-dev libtool libevent-dev
   ```
   Prepare for and download bitcoin source code:
   ```
   mkdir ~/bin
   cd ~/bin
-  git clone -b v0.11.2 https://github.com/bitcoin/bitcoin.git
+  git clone -b v0.16.2 https://github.com/bitcoin/bitcoin.git
   cd bitcoin/
   ```
   Configure and compile the source code; install to the bin directory (this will take 30+ minutes):
