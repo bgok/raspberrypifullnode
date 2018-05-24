@@ -15,11 +15,11 @@ I decided to create my own Bitcoin full node on a Raspberry Pi. My Raspberry Pi 
 
 I am going to assume that if you are reading this to create your own Raspberry Pi bitcoin full node, then you already know a little bit about linux, electronics, or running command line tools like SSH. 
 
-## Parts List  (total cost ~$80)
+## Parts List  (total cost ~$144)
 
-* [Raspberry Pi 2 - Model B+](https://www.adafruit.com/products/2358) (~$40)
-* [Raspberry Pi Case](https://www.adafruit.com/products/2285) (~$5)
-* [MicroSD card with 64 GB of storage](http://amzn.com/B00R7CSHWW) (~$25)
+* [Raspberry Pi 2 - Model B+](https://www.adafruit.com/product/3775) ($35)
+* [Raspberry Pi Case](https://www.adafruit.com/products/2285) ($5)
+* [MicroSD card with 256 GB of storage](http://a.co/5JlC3qv) (~$96)
 * [Mirco USB charger that you can dedicate to the Raspberry Pi](https://www.adafruit.com/products/1995) (~$8)
 
 * Ethernet CAT45 cable (assuming you have one around somewhere)
@@ -27,7 +27,7 @@ I am going to assume that if you are reading this to create your own Raspberry P
 
 ## Steps to Follow
 
-1. **Prepare the MicroSD Card:** The blockchain is growing quickly (30+ GBs at the time of this writing), so I felt 64 GB was a good size for the Raspberry Pi's storage. I suppose you could go for 128 GBs to be even more future-proof, if you are willing to spend the money. The MicroSD card will likely come formatted as exfat, instead of FAT32, but the Raspberry Pi needs FAT32. I recommend using the built-in tools on Windows or Mac OSX to format the MicroSD. If you only have a Linux box to start, you probably already know how to format the microSD card. Since I run a Mac, I just used the built-in Disk Utility and formatted as "MS-DOS (FAT)," which is really FAT32. 
+1. **Prepare the MicroSD Card:** The blockchain is growing quickly (190+ GBs at the time of this writing), so I felt 256 GB was a good size for the Raspberry Pi's storage. I suppose you could go for 400 GBs to be even more future-proof, if you are willing to spend the money. The MicroSD card will likely come formatted as exfat, instead of FAT32, but the Raspberry Pi needs FAT32. I recommend using the built-in tools on Windows or Mac OSX to format the MicroSD. If you only have a Linux box to start, you probably already know how to format the microSD card. Since I run a Mac, I just used the built-in Disk Utility and formatted as "MS-DOS (FAT)," which is really FAT32. 
 
 2. **Install the operating system:** Installing software on a Raspberry Pi can be mildly complicated. I suggest using their [NOOBS](https://www.raspberrypi.org/documentation/installation/noobs.md) install manager to make it painless. Just follow the link for [NOOBS](https://www.raspberrypi.org/documentation/installation/noobs.md), download the files and copy them to your FAT32 microSD card and get ready to turning things on.
 
@@ -36,40 +36,43 @@ I am going to assume that if you are reading this to create your own Raspberry P
     At boot up, select Raspbian as your operating system and let NOOBS get the OS set up. Do not bother with any setting that will launch "startx" (the GUI interface) at boot time, since this full node will only be configured via command line.
 
 4. **Update Raspberry Pi:** 
-
-  Add "en_US.UTF-8 UTF-8" to the locale list and set your time zone and then reboot: 
-  ```
-  sudo raspi-config
-  sudo reboot
-  ```
-  Keep everything fresh:
-  ```
-  sudo apt-get update
-  sudo apt-get upgrade
-  ```
-  Install dependencies (broken up here to show more cleanly - you can do one apt-get call if you want):
-  ```
-  sudo apt-get install build-essential autoconf libssl-dev libboost-dev 
-  sudo apt-get install libboost-chrono-dev libboost-filesystem-dev
-  sudo apt-get install libboost-program-options-dev libboost-system-dev 
-  sudo apt-get install libboost-test-dev libboost-thread-dev libtool libevent-dev
-  ```
-  Prepare for and download bitcoin source code:
-  ```
-  mkdir ~/bin
-  cd ~/bin
-  git clone -b v0.16.2 https://github.com/bitcoin/bitcoin.git
-  cd bitcoin/
-  ```
-  Configure and compile the source code; install to the bin directory (this will take 30+ minutes):
-  ```
-  ./autogen.sh
-  ./configure CPPFLAGS="-I/usr/local/BerkeleyDB.4.8/include -O2" LDFLAGS="-L/usr/local/BerkeleyDB.4.8/lib" --disable-wallet
-  make
-  sudo make install
-  ```
+    1. Configure the Raspberry Pi:
+        ```
+        sudo raspi-config
+        ```
+    
+        * Add "en_US.UTF-8 UTF-8" to the locale list and set your time zone.
+        * Enable SSH
+        * Change the password for the `pi` user
+        * Set the host name
+        
+        ```
+        sudo reboot
+        ```
+    2. Freshen up:
+        ```
+        sudo apt-get update
+        sudo apt-get upgrade
+        ```
+    3. Install dependencies:
+        ```
+        sudo apt-get install build-essential autoconf libssl-dev libboost-dev libboost-chrono-dev libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libboost-test-dev libboost-thread-dev libtool libevent-dev
+        ```
+    4. Prepare for and download bitcoin source code:
+        ```
+        mkdir ~/bin
+        cd ~/bin
+        git clone -b v0.16.0 https://github.com/bitcoin/bitcoin.git
+        cd bitcoin/
+        ```
+    5. Configure and compile the source code; install to the bin directory (this will take 30+ minutes):
+        ```
+        ./autogen.sh
+        ./configure CPPFLAGS="-I/usr/local/BerkeleyDB.4.8/include -O2" LDFLAGS="-L/usr/local/BerkeleyDB.4.8/lib" --disable-wallet
+        make
+        sudo make install
+        ```
 5. **Verify your Bitcoin full node is working:** Assuming all went well (above) you can just type the following in your command line:
-
     ```
     bitcoind &
     ```
@@ -80,11 +83,9 @@ I am going to assume that if you are reading this to create your own Raspberry P
     It will likely tell you that it is loading the blockchain or tell you how many blocks have been loaded thus far.  If you made it this far, *congratulations!* Unfortunately, you are far from over.
 
     For now, just stop the Bitcoin server you just worked so hard to start with the following command:
-
     ```
     bitcoin-cli stop
     ````
-
 6. **Side-load the blockchain:** In my experience, the Raspberry Pi 2 with its 1 GB of RAM and quad processors was not able to synchronize the blockchain on its own. Once it gets to about block 300,000 it starts to run out of RAM and all of the coaxing in the world does not help. (Note: one reader of this guide explained that you can control the RAM usage by starting the Bitcoin server with the following command 'bitcoind --dbcache=50 &'. If you want to give it a try, start up the Bitcoin service using that switch and see if that will allow you to synchronize the blockchain without running out of RAM.) Again, just my experience and newer versions of Bitcoin may resolve this issue. 
 
     Solution? Synchronize the blockchain on your primary machine and then simply copy your personal seed of the Bitcoin blockchain to your Raspberry Pi full node. The files you need are in the 'blocks' folder and the 'chainstate' folder. You can use the following command using SCP (basically SSH for copying files) to move the files from your main computer to your Raspberry Pi full node (you can also use WinSCP on a Windows machine or Cyberduck on a Mac - but I prefer the command line):
@@ -105,15 +106,12 @@ I am going to assume that if you are reading this to create your own Raspberry P
     Why do you need port forwarding? Basically it allows other Bitcoin peers to automatically connect to *you* without the need for you to invite them first. Without port forwarding you will have far fewer peers and not allow the Bitcoin network to be healthy. So much so, that you cannot really claim you are running a full node without port forwarding (or wide open IP access) enabled.
 
 ## **You're Done!**
-
-    You should be all set! Remember when you want to check in on things just open and SSH connection and run:
-
-    ```
-    bitcoin-cli getinfo
-    ```
+You should be all set! Remember when you want to check in on things just open and SSH connection and run:
+```
+bitcoin-cli getblockchaininfo
+```
 
 ## Like this information and want to tip me in Bitcoin? -thanks!
-
 ![Bitcoin Tip Address](https://s3.amazonaws.com/dcarns/Public/bitcoinaddress.png)
 
 [19qNSoJdTfRLNoXJUBndgcd9uusr1BroY](bitcoin://19qNSoJdTfRLNoXJUBndgcd9uusr1BroY)
