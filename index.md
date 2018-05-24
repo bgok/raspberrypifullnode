@@ -27,52 +27,56 @@ I am going to assume that if you are reading this to create your own Raspberry P
 
 ## Steps to Follow
 
-1. **Prepare the MicroSD Card:** The blockchain is growing quickly (190+ GBs at the time of this writing), so I felt 256 GB was a good size for the Raspberry Pi's storage. I suppose you could go for 400 GBs to be even more future-proof, if you are willing to spend the money. The MicroSD card will likely come formatted as exfat, instead of FAT32, but the Raspberry Pi needs FAT32. I recommend using the built-in tools on Windows or Mac OSX to format the MicroSD. If you only have a Linux box to start, you probably already know how to format the microSD card. Since I run a Mac, I just used the built-in Disk Utility and formatted as "MS-DOS (FAT)," which is really FAT32. 
+1. **Prepare the MicroSD Card:**
+    The blockchain is growing quickly (190+ GBs at the time of this writing), so I felt 256 GB was a good size for the Raspberry Pi's storage. I suppose you could go for 400 GBs to be even more future-proof, if you are willing to spend the money. The MicroSD card will likely come formatted as exfat, instead of FAT32, but the Raspberry Pi needs FAT32. I recommend using the built-in tools on Windows or Mac OSX to format the MicroSD. If you only have a Linux box to start, you probably already know how to format the microSD card. Since I run a Mac, I just used the built-in Disk Utility and formatted as "MS-DOS (FAT)," which is really FAT32. 
 
-2. **Install the operating system:** Installing software on a Raspberry Pi can be mildly complicated. I suggest using their [NOOBS](https://www.raspberrypi.org/documentation/installation/noobs.md) install manager to make it painless. Just follow the link for [NOOBS](https://www.raspberrypi.org/documentation/installation/noobs.md), download the files and copy them to your FAT32 microSD card and get ready to turning things on.
+2. **Install the operating system:**
+    Installing software on a Raspberry Pi can be mildly complicated. I suggest using their [NOOBS](https://www.raspberrypi.org/documentation/installation/noobs.md) install manager to make it painless. Just follow the link for [NOOBS](https://www.raspberrypi.org/documentation/installation/noobs.md), download the files and copy them to your FAT32 microSD card and get ready to turning things on.
 
-3. **Initial configuration:** There are ways to avoid using a keyboard, video display, and mouse (KVM) altogether. But in the interest of keeping things simple I recommend putting your Raspberry Pi into its case, **then insert the microSD card** into your Raspberry Pi (trust me, it is easier to put the case on first), hook up the KVM cables, plugin the ethernet cable, and plugin the power. 
+3. **Initial configuration:**
+    There are ways to avoid using a keyboard, video display, and mouse (KVM) altogether. But in the interest of keeping things simple I recommend putting your Raspberry Pi into its case, **then insert the microSD card** into your Raspberry Pi (trust me, it is easier to put the case on first), hook up the KVM cables, plugin the ethernet cable, and plugin the power. 
 
     At boot up, select Raspbian as your operating system and let NOOBS get the OS set up. Do not bother with any setting that will launch "startx" (the GUI interface) at boot time, since this full node will only be configured via command line.
 
-4. **Update Raspberry Pi:** 
-    1. Configure the Raspberry Pi:
-        ```
-        sudo raspi-config
-        ```
-    
-        * Add "en_US.UTF-8 UTF-8" to the locale list and set your time zone.
-        * Enable SSH
-        * Change the password for the `pi` user
-        * Set the host name
-        
-        ```
-        sudo reboot
-        ```
-    2. Freshen up:
-        ```
-        sudo apt-get update
-        sudo apt-get upgrade
-        ```
-    3. Install dependencies:
-        ```
-        sudo apt-get install build-essential autoconf libssl-dev libboost-dev libboost-chrono-dev libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libboost-test-dev libboost-thread-dev libtool libevent-dev
-        ```
-    4. Prepare for and download bitcoin source code:
-        ```
-        mkdir ~/bin
-        cd ~/bin
-        git clone -b v0.16.0 https://github.com/bitcoin/bitcoin.git
-        cd bitcoin/
-        ```
-    5. Configure and compile the source code; install to the bin directory (this will take 30+ minutes):
-        ```
-        ./autogen.sh
-        ./configure CPPFLAGS="-I/usr/local/BerkeleyDB.4.8/include -O2" LDFLAGS="-L/usr/local/BerkeleyDB.4.8/lib" --disable-wallet
-        make
-        sudo make install
-        ```
-5. **Verify your Bitcoin full node is working:** Assuming all went well (above) you can just type the following in your command line:
+4. **Configure the Raspberry Pi:**
+    ```
+    sudo raspi-config
+    ```
+
+    * Add "en_US.UTF-8 UTF-8" to the locale list and set your time zone.
+    * Enable SSH
+    * Change the password for the `pi` user
+    * Set the host name
+
+    ```
+    sudo reboot
+    ```
+5. **Freshen up:**
+    *Note: From this step onward, you can ssh to the Raspberry Pi and type commands there.*
+    ```
+    sudo apt-get update
+    sudo apt-get upgrade
+    ```
+6. **Install dependencies:**
+    ```
+    sudo apt-get install build-essential autoconf libssl-dev libboost-dev libboost-chrono-dev libboost-filesystem-dev libboost-program-options-dev libboost-system-dev libboost-test-dev libboost-thread-dev libtool libevent-dev
+    ```
+7. **Download bitcoin source code:**
+    ```
+    mkdir ~/bin
+    cd ~/bin
+    git clone -b v0.16.0 https://github.com/bitcoin/bitcoin.git
+    cd bitcoin/
+    ```
+8. **Configure, compile and install (this will take 30+ minutes):**
+    ```
+    ./autogen.sh
+    ./configure CPPFLAGS="-I/usr/local/BerkeleyDB.4.8/include -O2" LDFLAGS="-L/usr/local/BerkeleyDB.4.8/lib" --disable-wallet
+    make
+    sudo make install
+    ```
+9. **Verify your Bitcoin full node is working:**
+    Assuming all went well (above) you can just type the following in your command line:
     ```
     bitcoind &
     ```
@@ -86,7 +90,8 @@ I am going to assume that if you are reading this to create your own Raspberry P
     ```
     bitcoin-cli stop
     ````
-6. **Side-load the blockchain:** In my experience, the Raspberry Pi 2 with its 1 GB of RAM and quad processors was not able to synchronize the blockchain on its own. Once it gets to about block 300,000 it starts to run out of RAM and all of the coaxing in the world does not help. (Note: one reader of this guide explained that you can control the RAM usage by starting the Bitcoin server with the following command 'bitcoind --dbcache=50 &'. If you want to give it a try, start up the Bitcoin service using that switch and see if that will allow you to synchronize the blockchain without running out of RAM.) Again, just my experience and newer versions of Bitcoin may resolve this issue. 
+10. **Side-load the blockchain:**
+    In my experience, the Raspberry Pi 2 with its 1 GB of RAM and quad processors was not able to synchronize the blockchain on its own. Once it gets to about block 300,000 it starts to run out of RAM and all of the coaxing in the world does not help. (Note: one reader of this guide explained that you can control the RAM usage by starting the Bitcoin server with the following command 'bitcoind --dbcache=50 &'. If you want to give it a try, start up the Bitcoin service using that switch and see if that will allow you to synchronize the blockchain without running out of RAM.) Again, just my experience and newer versions of Bitcoin may resolve this issue. 
 
     Solution? Synchronize the blockchain on your primary machine and then simply copy your personal seed of the Bitcoin blockchain to your Raspberry Pi full node. The files you need are in the 'blocks' folder and the 'chainstate' folder. You can use the following command using SCP (basically SSH for copying files) to move the files from your main computer to your Raspberry Pi full node (you can also use WinSCP on a Windows machine or Cyberduck on a Mac - but I prefer the command line):
 
@@ -101,7 +106,8 @@ I am going to assume that if you are reading this to create your own Raspberry P
     bitcoind &
     ````
 
-7. **Make sure port forwarding is turned on in your router:** One more, quite important thing...you need to enable port forwarding on your router to point to *port 8333* to your internal Bitcoin full node IP address. I'm not sure if you need both TCP and UDP forwarded, but I did both and everything is working great. How do you do this? Each router is different and each cable/fiber/DSL provider has instructions somewhere. Your router, in fact, might automatically do it for you, since gaming machines like the XBOX and Playstation benefit from port forwarding and ISPs don't want to deal with explaining how to set it up, so they auto-detect services you are running that need port forwarding and make it happen. 
+11. **Make sure port forwarding is turned on in your router:**
+    One more, quite important thing...you need to enable port forwarding on your router to point to *port 8333* to your internal Bitcoin full node IP address. I'm not sure if you need both TCP and UDP forwarded, but I did both and everything is working great. How do you do this? Each router is different and each cable/fiber/DSL provider has instructions somewhere. Your router, in fact, might automatically do it for you, since gaming machines like the XBOX and Playstation benefit from port forwarding and ISPs don't want to deal with explaining how to set it up, so they auto-detect services you are running that need port forwarding and make it happen. 
 
     Why do you need port forwarding? Basically it allows other Bitcoin peers to automatically connect to *you* without the need for you to invite them first. Without port forwarding you will have far fewer peers and not allow the Bitcoin network to be healthy. So much so, that you cannot really claim you are running a full node without port forwarding (or wide open IP access) enabled.
 
